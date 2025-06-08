@@ -402,6 +402,42 @@
         .color-3 { background: linear-gradient(45deg, #ffbe0b, #ffd54f); }
         .color-4 { background: linear-gradient(45deg, #8338ec, #a368fc); }
         .color-5 { background: linear-gradient(45deg, #3a86ff, #6ba2ff); }
+
+        /* Adicione no seu <style> */
+.slider-container {
+    position: relative;
+}
+
+.slider-container::before,
+.slider-container::after {
+    content: '⬇️';
+    position: absolute;
+    top: -20px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.slider-container::before {
+    left: 10px;
+    content: 'Graves';
+}
+
+.slider-container::after {
+    right: 10px;
+    content: 'Agudos';
+}
+
+#bass-slider::-webkit-slider-thumb {
+    background: #4ecdc4;
+}
+
+#mid-slider::-webkit-slider-thumb {
+    background: #ffbe0b;
+}
+
+#treble-slider::-webkit-slider-thumb {
+    background: #ff6b6b;
+}
     </style>
 </head>
 <body>
@@ -531,334 +567,7 @@
     <footer>
         <p>SoundWave Studio &copy; 2023 - Reprodutor de Música Avançado</p>
     </footer>
-
-    <script>
-        // Elementos do DOM
-        const currentTrackEl = document.getElementById('current-track');
-        const currentArtistEl = document.getElementById('current-artist');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const playIcon = document.getElementById('play-icon');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const progressBar = document.getElementById('progress-bar');
-        const progressContainer = document.getElementById('progress-container');
-        const currentTimeEl = document.getElementById('current-time');
-        const totalTimeEl = document.getElementById('total-time');
-        const playlistEl = document.getElementById('playlist');
-        const visualizer = document.getElementById('visualizer');
-        const ctx = visualizer.getContext('2d');
-
-        // Controles de Equalizador (para futura implementação)
-        const bassSlider = document.getElementById('bass-slider');
-        const midSlider = document.getElementById('mid-slider');
-        const trebleSlider = document.getElementById('treble-slider');
-        const bassValueEl = document.getElementById('bass-value');
-        const midValueEl = document.getElementById('mid-value');
-        const trebleValueEl = document.getElementById('treble-value');
-
-        // Efeitos Sonoros (para futura implementação)
-        const noiseReductionBtn = document.getElementById('noise-reduction-btn');
-        const reverbBtn = document.getElementById('reverb-btn');
-        const echoBtn = document.getElementById('echo-btn');
-
-        // Música e playlist
-        const playlistData = [ // Renomeado para evitar conflito com a variável global 'playlist' do DOM
-            {
-                title: "Não existe amor em SP",
-                artist: "Criolo",
-                duration: "3:45",
-                color: "color-1",
-                file: "./musicas/criolo.mp3"
-            },
-            {
-                title: "Bass Revolution",
-                artist: "Deep Bass Collective",
-                duration: "4:20",
-                color: "color-2",
-                file: "./musicas/Ana Vilela.mp3"
-            },
-            {
-                title: "Midnight Drive",
-                artist: "Neon Dreams",
-                duration: "3:30",
-                color: "color-3",
-                file: "./musicas/vento no litoral.mp3"
-            },
-            {
-                title: "Digital Sunrise",
-                artist: "Circuit Masters",
-                duration: "5:15",
-                color: "color-4",
-                file: "./musicas/La Solitudine.mp3"
-            },
-            {
-                title: "Cosmic Harmony",
-                artist: "Space Echo",
-                duration: "4:50",
-                color: "color-5",
-                file: "./musicas/A Via Láctea.mp3"
-            }
-        ];
-
-        let currentTrackIndex = 0;
-        let isPlaying = false;
-        const audioElement = new Audio();
-        let audioContext;
-        let analyser;
-        let source;
-        let animationId;
-        let isInitialized = false; // Flag para garantir que o AudioContext seja configurado apenas uma vez
-
-        // Funções do Player
-        function loadTrack(index) {
-            const track = playlistData[index];
-            currentTrackEl.textContent = track.title;
-            currentArtistEl.textContent = track.artist;
-            
-            // Atualiza a arte do álbum com a cor da faixa
-            const albumArtEl = document.querySelector('.album-art');
-            albumArtEl.className = `album-art ${track.color}`;
-
-            audioElement.src = track.file;
-            audioElement.load(); // Carrega a música
-            
-            // Reseta tempo
-            currentTimeEl.textContent = '0:00';
-            progressBar.style.width = '0%';
-            
-            // Remove a classe 'playing' de todas as faixas e adiciona à faixa atual
-            document.querySelectorAll('.playlist-item').forEach((item, i) => {
-                item.classList.toggle('playing', i === index);
-            });
-
-            // Quando os metadados são carregados, atualizamos a duração
-            audioElement.addEventListener('loadedmetadata', () => {
-                const duration = audioElement.duration;
-                const minutes = Math.floor(duration / 60);
-                const seconds = Math.floor(duration % 60);
-                totalTimeEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            });
-        }
-
-        function playTrack() {
-            // Verifica se o contexto de áudio está suspenso (política de autoplay)
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
-            audioElement.play()
-                .then(() => {
-                    isPlaying = true;
-                    playIcon.className = 'fas fa-pause';
-                    // Adiciona o listener de timeupdate somente quando a música começa a tocar
-                    audioElement.addEventListener('timeupdate', updateProgress);
-                })
-                .catch(error => {
-                    console.error("Erro ao reproduzir:", error);
-                    alert("Não foi possível reproduzir a música. Verifique se o navegador permite autoplay ou tente interagir com a página primeiro (clicar em play).");
-                });
-        }
-
-        function pauseTrack() {
-            audioElement.pause();
-            isPlaying = false;
-            playIcon.className = 'fas fa-play';
-            audioElement.removeEventListener('timeupdate', updateProgress); // Remove o listener ao pausar
-        }
-
-        function togglePlayPause() {
-            if (isPlaying) {
-                pauseTrack();
-            } else {
-                playTrack();
-            }
-        }
-
-        function nextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % playlistData.length;
-            loadTrack(currentTrackIndex);
-            if (isPlaying) {
-                playTrack();
-            }
-        }
-
-        function prevTrack() {
-            currentTrackIndex = (currentTrackIndex - 1 + playlistData.length) % playlistData.length;
-            loadTrack(currentTrackIndex);
-            if (isPlaying) {
-                playTrack();
-            }
-        }
-
-        function updateProgress() {
-            const { currentTime, duration } = audioElement;
-            const progressPercent = (currentTime / duration) * 100;
-            progressBar.style.width = `${progressPercent}%`;
-            
-            // Atualizar tempo atual
-            const minutes = Math.floor(currentTime / 60);
-            const seconds = Math.floor(currentTime % 60);
-            currentTimeEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            // Se a música terminar, ir para a próxima
-            if (audioElement.ended) {
-                nextTrack();
-            }
-        }
-
-        function setProgress(e) {
-            const width = this.clientWidth;
-            const clickX = e.offsetX;
-            const duration = audioElement.duration;
-            audioElement.currentTime = (clickX / width) * duration;
-        }
-
-        // Funções de Renderização
-        function renderPlaylist() {
-            playlistEl.innerHTML = ''; // Limpa a playlist existente
-            playlistData.forEach((track, index) => {
-                const playlistItem = document.createElement('div');
-                playlistItem.classList.add('playlist-item');
-                if (index === currentTrackIndex) {
-                    playlistItem.classList.add('playing');
-                }
-                playlistItem.dataset.index = index; // Armazena o índice para fácil acesso
-
-                playlistItem.innerHTML = `
-                    <div class="playlist-art ${track.color}">
-                        <i class="fas fa-music"></i>
-                    </div>
-                    <div class="playlist-info">
-                        <div class="playlist-track">${track.title}</div>
-                        <div class="playlist-artist">${track.artist}</div>
-                    </div>
-                    <div class="playlist-duration">${track.duration}</div>
-                `;
-                playlistItem.addEventListener('click', () => {
-                    currentTrackIndex = index;
-                    loadTrack(currentTrackIndex);
-                    playTrack();
-                });
-                playlistEl.appendChild(playlistItem);
-            });
-        }
-
-        // Configuração de Event Listeners
-        function setupEventListeners() {
-            playPauseBtn.addEventListener('click', togglePlayPause);
-            prevBtn.addEventListener('click', prevTrack);
-            nextBtn.addEventListener('click', nextTrack);
-            progressContainer.addEventListener('click', setProgress);
-            window.addEventListener('resize', resizeCanvas); // Redimensiona o canvas quando a janela é redimensionada
-        }
-
-        // Visualizador de áudio
-        function animateVisualizer() {
-            if (!analyser) return; // Garante que o analyser esteja disponível
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteTimeDomainData(dataArray); // Obtém os dados do domínio de tempo
-
-            const width = visualizer.width;
-            const height = visualizer.height;
-            
-            ctx.clearRect(0, 0, width, height); // Limpa o canvas a cada frame
-            
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#4ecdc4';
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#4ecdc4';
-            
-            ctx.beginPath();
-            
-            const sliceWidth = width * 1.0 / bufferLength;
-            let x = 0;
-            
-            for (let i = 0; i < bufferLength; i++) {
-                const v = dataArray[i] / 128.0; // Normaliza para um valor entre 0 e 2
-                const y = v * height / 2;
-                
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-                
-                x += sliceWidth;
-            }
-            
-            ctx.lineTo(width, height / 2); // Linha final para garantir que a onda chegue até o final
-            ctx.stroke();
-            
-            animationId = requestAnimationFrame(animateVisualizer); // Chama a função novamente no próximo frame
-        }
-
-        function resizeCanvas() {
-            visualizer.width = visualizer.clientWidth;
-            visualizer.height = visualizer.clientHeight;
-        }
-
-        // Funções de Equalizador (simplificadas, exigiria AudioContext e BiquadFilterNodes)
-        function updateEqualizer() {
-            bassValueEl.textContent = `${bassSlider.value} dB`;
-            midValueEl.textContent = `${midSlider.value} dB`;
-            trebleValueEl.textContent = `${trebleSlider.value} dB`;
-            // Aqui você adicionaria a lógica para aplicar os filtros de equalização ao AudioContext
-        }
-
-        // Funções de Efeitos (simplificadas, exigiria AudioContext e outros nodes)
-        function toggleEffect(button, effectName) {
-            if (button.textContent === 'Ativar') {
-                button.textContent = 'Desativar';
-                button.style.background = 'rgba(255, 107, 107, 0.8)'; // Cor de desativação
-                // Lógica para ativar o efeito
-            } else {
-                button.textContent = 'Ativar';
-                button.style.background = 'rgba(40, 40, 60, 0.7)'; // Cor original
-                // Lógica para desativar o efeito
-            }
-        }
-
-        // Inicialização
-        function init() {
-            // Inicializa AudioContext e AnalyserNode apenas uma vez
-            if (!isInitialized) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256; // Ajusta a qualidade da visualização
-
-                // Conecta o elemento de áudio ao contexto de áudio
-                // Precisa ser feito após a primeira interação do usuário devido às políticas de autoplay
-                audioElement.addEventListener('canplay', () => {
-                    if (!source) { // Garante que a fonte seja criada apenas uma vez
-                        source = audioContext.createMediaElementSource(audioElement);
-                        source.connect(analyser);
-                        analyser.connect(audioContext.destination);
-                    }
-                });
-                isInitialized = true;
-            }
-
-            renderPlaylist();
-            loadTrack(currentTrackIndex);
-            setupEventListeners();
-            resizeCanvas(); // Garante que o canvas tenha o tamanho correto na inicialização
-            animateVisualizer(); // Inicia a animação do visualizador
-
-            // Event listeners para os sliders do equalizador
-            bassSlider.addEventListener('input', updateEqualizer);
-            midSlider.addEventListener('input', updateEqualizer);
-            trebleSlider.addEventListener('input', updateEqualizer);
-
-            // Event listeners para os botões de efeito
-            noiseReductionBtn.addEventListener('click', () => toggleEffect(noiseReductionBtn, 'noise-reduction'));
-            reverbBtn.addEventListener('click', () => toggleEffect(reverbBtn, 'reverb'));
-            echoBtn.addEventListener('click', () => toggleEffect(echoBtn, 'echo'));
-        }
-
-        // Iniciar quando a página carregar
-        window.addEventListener('load', init);
-    </script>
+<script src="arquivo.js" defer></script>
+  
 </body>
 </html>
