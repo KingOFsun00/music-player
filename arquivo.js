@@ -35,7 +35,7 @@ const echoBtn = document.getElementById('echo-btn');
 const playlistData = [
     { title: "A Via Láctea", artist: "Legião Urbana", duration: "4:00", color: "color-1", file: "./musicas/A Via Láctea.mp3" },
     { title: "La Solitudine", artist: "Laura Pausini", duration: "4:00", color: "color-2", file: "./musicas/la Solitudine.mp3" },
-    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", color: "color-3", file: "./musicas/ANA Vilela.mp3" },
+    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", color: "color-3", file: "./musicas/Ana Vilela.mp3" },
     { title: "Moonlight", artist: "XXXTENTACION", duration: "2:15", color: "color-4", file: "./musicas/MOONLIGHT.mp3" },
     { title: "Não Existe Amor Em SP", artist: "Criolo", duration: "3:45", color: "color-5", file: "./musicas/criolo.mp3" },
     { title: "Vento no Litoral", artist: "Legião Urbana", duration: "6:00", color: "color-1", file: "./musicas/vento no litoral.mp3" }
