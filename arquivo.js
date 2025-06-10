@@ -4,12 +4,12 @@
 // diretamente no navegador devido a restrições de segurança.
 // Use URLs públicas ou hospede seus arquivos em um servidor.
 const playlist = [
-    { title: 'A Via Láctea', artist: 'Legião Urbana', src: 'https://www.soundhelix.com/examples/soundhelix-mp3-1.mp3', duration: '0:30' },
-    { title: 'Upbeat Fun', artist: 'Groovy Tunes', src: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/sample-mp3-file.mp3', duration: '0:09' },
-    { title: 'Acoustic Journey', artist: 'Nature Sounds', src: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3', duration: '2:04' },
-    { title: 'Electronic Pulse', artist: 'Synth Wave', src: 'https://www.mfiles.co.uk/mp3-samples/sir-roger-de-coverley.mp3', duration: '0:22' },
-    { title: 'Ambient Flow', artist: 'Deep Meditations', src: 'https://www.soundhelix.com/examples/soundhelix-mp3-1.mp3', duration: '0:30' },
-    { title: 'Rhythmic Beat', artist: 'Urban Grooves', src: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3', duration: '2:04' },
+    { title: "A Via Láctea", artist: "Legião Urbana", duration: "4:00", color: "color-1", src: "./musicas/A Via Láctea.mp3" },
+    { title: "La Solitudine", artist: "Laura Pausini", duration: "4:00", color: "color-2", src: "./musicas/La Solitudine.mp3" },
+    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", color: "color-3", src: "./musicas/Ana Vilela.mp3" },
+    { title: "Moonlight", artist: "XXXTENTACION", duration: "2:15", color: "color-4", src: "./musicas/MOONLIGHT.mp3" },
+    { title: "Não Existe Amor Em SP", artist: "Criolo", duration: "3:45", color: "color-5", src: "./musicas/criolo.mp3" },
+    { title: "Vento no Litoral", artist: "Legião Urbana", duration: "6:00", color: "color-1", src: "./musicas/vento no litoral.mp3" }
 ];
 
 let currentTrackIndex = 0; // Índice da faixa principal sendo exibida/controlada
