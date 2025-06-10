@@ -6,6 +6,7 @@
     <title>SoundWave Studio - Reprodutor Avançado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Estilos globais e reset */
         * {
             margin: 0;
             padding: 0;
@@ -29,6 +30,7 @@
             margin: 0 auto;
         }
         
+        /* Cabeçalho */
         header {
             text-align: center;
             padding: 30px 0;
@@ -52,6 +54,7 @@
             line-height: 1.6;
         }
         
+        /* Contêiner principal do player e controles */
         .player-container {
             display: flex;
             flex-wrap: wrap;
@@ -59,16 +62,7 @@
             margin-bottom: 40px;
         }
         
-        .visualization-section {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(30, 30, 50, 0.7);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-        
+        .visualization-section,
         .controls-section {
             flex: 1;
             min-width: 300px;
@@ -88,6 +82,7 @@
             gap: 10px;
         }
         
+        /* Visualizador de Áudio */
         .visualizer-container {
             height: 250px;
             background: rgba(10, 10, 20, 0.5);
@@ -103,6 +98,7 @@
             height: 100%;
         }
         
+        /* Informações da Faixa */
         .track-info {
             display: flex;
             align-items: center;
@@ -139,6 +135,7 @@
             color: #a0a0c0;
         }
         
+        /* Barra de Progresso */
         .progress-container {
             background: rgba(40, 40, 60, 0.5);
             height: 8px;
@@ -177,6 +174,7 @@
             margin-top: 5px;
         }
         
+        /* Controles do Player */
         .player-controls {
             display: flex;
             justify-content: center;
@@ -211,43 +209,58 @@
             font-size: 2rem;
             background: rgba(78, 205, 196, 0.8);
         }
+
+        .control-btn.small-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
         
+        /* Equalizador */
         .equalizer {
             margin: 25px 0;
-        }
-        
-        .eq-slider {
-            margin-bottom: 20px;
-        }
-        
-        .eq-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 1rem;
-            color: #e0e0e0;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
+            display: flex; 
+            justify-content: space-around;
             gap: 10px;
+            flex-wrap: wrap; 
         }
         
-        .eq-name {
-            width: 80px;
+        .eq-band {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px; 
         }
         
-        .slider {
-            flex: 1;
-            height: 8px;
+        .eq-band-label {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .eq-band-value {
+            font-size: 0.8rem;
+            color: #a0a0c0;
+            margin-top: 5px;
+        }
+        
+        .eq-band-slider {
+            height: 120px; 
+            width: 8px; 
             -webkit-appearance: none;
             background: rgba(40, 40, 60, 0.7);
             border-radius: 4px;
             outline: none;
+            /* Rotate to make it vertical, then adjust position */
+            transform: rotate(-90deg); 
+            transform-origin: 50% 50%;
+            margin: 30px 0; 
         }
-        
-        .slider::-webkit-slider-thumb {
+
+        /* Thumb style for vertical sliders */
+        .eq-band-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 20px;
             height: 20px;
@@ -257,6 +270,7 @@
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.8);
         }
         
+        /* Controles de Efeitos */
         .effects-controls {
             margin: 30px 0;
         }
@@ -302,6 +316,7 @@
             background: rgba(78, 205, 196, 0.8);
         }
         
+        /* Playlist */
         .playlist {
             width: 100%;
             background: rgba(30, 30, 50, 0.7);
@@ -377,6 +392,7 @@
             color: #a0a0c0;
         }
         
+        /* Rodapé */
         footer {
             text-align: center;
             padding: 20px;
@@ -387,6 +403,7 @@
             margin-top: auto;
         }
         
+        /* Responsividade */
         @media (max-width: 768px) {
             .player-container {
                 flex-direction: column;
@@ -395,49 +412,111 @@
             h1 {
                 font-size: 2.5rem;
             }
+
+            .equalizer {
+                flex-direction: row; 
+                justify-content: center;
+            }
+
+            .eq-band {
+                margin-bottom: 20px; 
+            }
         }
         
+        /* Cores para os itens da playlist */
         .color-1 { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
         .color-2 { background: linear-gradient(45deg, #4ecdc4, #6de0d7); }
         .color-3 { background: linear-gradient(45deg, #ffbe0b, #ffd54f); }
         .color-4 { background: linear-gradient(45deg, #8338ec, #a368fc); }
         .color-5 { background: linear-gradient(45deg, #3a86ff, #6ba2ff); }
 
-        /* Adicione no seu <style> */
-.slider-container {
-    position: relative;
-}
+        /* Controles Multi-faixa */
+        .multi-track-section {
+            background: rgba(30, 30, 50, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            margin-top: 30px; 
+            width: 100%; 
+        }
 
-.slider-container::before,
-.slider-container::after {
-    content: '⬇️';
-    position: absolute;
-    top: -20px;
-    font-size: 12px;
-    opacity: 0.6;
-}
+        .track-control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+        }
 
-.slider-container::before {
-    left: 10px;
-    content: 'Graves';
-}
+        .track-control {
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.slider-container::after {
-    right: 10px;
-    content: 'Agudos';
-}
+        .track-control h3 {
+            font-size: 1.4rem;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+        }
 
-#bass-slider::-webkit-slider-thumb {
-    background: #4ecdc4;
-}
+        .track-selector {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(40, 40, 60, 0.9);
+            color: #fff;
+            border: 1px solid rgba(78, 205, 196, 0.5);
+            margin-bottom: 15px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C197.8L156.4%2C67.2c-5.8-5.8-15.2-5.8-20.9%2C0L5.4%2C197.8c-5.8%2C5.8-5.8%2C15.2%2C0%2C20.9l19.5%2C19.5c5.8%2C5.8%2C15.2%2C5.8%2C20.9%2C0l96.8-96.8l96.8%2C96.8c5.8%2C5.8%2C15.2%2C5.8%2C20.9%2C0l19.5-19.5C292.9%2C213%2C292.9%2C203.6%2C287%2C197.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px;
+        }
+        
+        .track-selector:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
 
-#mid-slider::-webkit-slider-thumb {
-    background: #ffbe0b;
-}
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            width: 100%; /* Take full width of parent */
+        }
 
-#treble-slider::-webkit-slider-thumb {
-    background: #ff6b6b;
-}
+        .volume-slider {
+            width: 150px; 
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff6b6b; 
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -448,6 +527,7 @@
         </header>
         
         <div class="player-container">
+            <!-- Seção de Visualização e Controles Principais -->
             <div class="visualization-section">
                 <h2 class="section-title"><i class="fas fa-wave-square"></i> Visualização</h2>
                 <div class="visualizer-container">
@@ -485,44 +565,11 @@
                 </div>
             </div>
             
+            <!-- Seção de Equalizador e Efeitos -->
             <div class="controls-section">
                 <h2 class="section-title"><i class="fas fa-sliders-h"></i> Equalizador</h2>
-                <div class="equalizer">
-                    <div class="eq-slider">
-                        <div class="eq-label">
-                            <span>Graves</span>
-                            <span id="bass-value">0 dB</span>
-                        </div>
-                        <div class="slider-container">
-                            <span class="eq-name"><i class="fas fa-volume-down"></i></span>
-                            <input type="range" min="-12" max="12" value="0" class="slider" id="bass-slider">
-                            <span class="eq-name"><i class="fas fa-volume-up"></i></span>
-                        </div>
-                    </div>
-                    
-                    <div class="eq-slider">
-                        <div class="eq-label">
-                            <span>Médios</span>
-                            <span id="mid-value">0 dB</span>
-                        </div>
-                        <div class="slider-container">
-                            <span class="eq-name"><i class="fas fa-volume-down"></i></span>
-                            <input type="range" min="-12" max="12" value="0" class="slider" id="mid-slider">
-                            <span class="eq-name"><i class="fas fa-volume-up"></i></span>
-                        </div>
-                    </div>
-                    
-                    <div class="eq-slider">
-                        <div class="eq-label">
-                            <span>Agudos</span>
-                            <span id="treble-value">0 dB</span>
-                        </div>
-                        <div class="slider-container">
-                            <span class="eq-name"><i class="fas fa-volume-down"></i></span>
-                            <input type="range" min="-12" max="12" value="0" class="slider" id="treble-slider">
-                            <span class="eq-name"><i class="fas fa-volume-up"></i></span>
-                        </div>
-                    </div>
+                <div class="equalizer" id="equalizer-controls">
+                    <!-- As bandas do equalizador serão geradas dinamicamente via JavaScript -->
                 </div>
                 
                 <h2 class="section-title"><i class="fas fa-wand-magic-sparkles"></i> Efeitos Sonoros</h2>
@@ -556,11 +603,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Seção de Controle Multi-Faixa -->
+        <div class="multi-track-section">
+            <h2 class="section-title"><i class="fas fa-layer-group"></i> Controle Multi-Faixa</h2>
+            <div class="track-control-panel">
+                <!-- Controle da Faixa 1 -->
+                <div class="track-control">
+                    <h3>Faixa 1</h3>
+                    <select class="track-selector" id="track1-select">
+                        <!-- Opções de faixa populadas por JavaScript -->
+                    </select>
+                    <div class="volume-control">
+                        <i class="fas fa-volume-down"></i>
+                        <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="track1-volume">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <button class="control-btn small-btn" id="track1-play-pause"><i class="fas fa-play"></i></button>
+                </div>
+                
+                <!-- Controle da Faixa 2 -->
+                <div class="track-control">
+                    <h3>Faixa 2</h3>
+                    <select class="track-selector" id="track2-select">
+                        <!-- Opções de faixa populadas por JavaScript -->
+                    </select>
+                    <div class="volume-control">
+                        <i class="fas fa-volume-down"></i>
+                        <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="track2-volume">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <button class="control-btn small-btn" id="track2-play-pause"><i class="fas fa-play"></i></button>
+                </div>
+            </div>
+        </div>
         
+        <!-- Seção da Playlist -->
         <div class="playlist">
             <h2 class="playlist-title"><i class="fas fa-list-music"></i> Playlist</h2>
             <div class="playlist-items" id="playlist">
-                </div>
+                <!-- Itens da playlist populados por JavaScript -->
+            </div>
         </div>
     </div>
     
@@ -568,6 +651,5 @@
         <p>SoundWave Studio &copy; 2023 - Reprodutor de Música Avançado</p>
     </footer>
 <script src="arquivo.js" defer></script>
-  
 </body>
 </html>
