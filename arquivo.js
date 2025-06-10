@@ -1,15 +1,15 @@
+// arquivo.js
+
 // --- Variáveis Globais e Constantes ---
-// Lista de músicas de exemplo. Você pode adicionar mais ou alterar os URLs.
-// ATENÇÃO: Caminhos de arquivo locais (e.g., './musicas/...') não funcionarão
-// diretamente no navegador devido a restrições de segurança.
-// Use URLs públicas ou hospede seus arquivos em um servidor.
+// Lista de músicas. Os caminhos agora são relativos à raiz do seu repositório GitHub Pages.
 const playlist = [
-    { title: "A Via Láctea", artist: "Legião Urbana", duration: "4:00", color: "color-1", src: "./musicas/A Via Láctea.mp3" },
-    { title: "La Solitudine", artist: "Laura Pausini", duration: "4:00", color: "color-2", src: "./musicas/La Solitudine.mp3" },
-    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", color: "color-3", src: "./musicas/Ana Vilela.mp3" },
-    { title: "Moonlight", artist: "XXXTENTACION", duration: "2:15", color: "color-4", src: "./musicas/MOONLIGHT.mp3" },
-    { title: "Não Existe Amor Em SP", artist: "Criolo", duration: "3:45", color: "color-5", src: "./musicas/criolo.mp3" },
-    { title: "Vento no Litoral", artist: "Legião Urbana", duration: "6:00", color: "color-1", src: "./musicas/vento no litoral.mp3" }
+    { title: "A Via Láctea", artist: "Legião Urbana", duration: "4:00", src: "./musicas/A Via Láctea.mp3" },
+    { title: "La Solitudine", artist: "Laura Pausini", duration: "4:00", src: "./musicas/La Solitudine.mp3" },
+    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", src: "./musicas/Trem Bala.mp3" }, 
+    { title: "Moonlight", artist: "XXXTENTACION", duration: "2:15", src: "./musicas/MOONLIGHT.mp3" },
+    { title: "Não Existe Amor Em SP", artist: "Criolo", duration: "3:45", src: "./musicas/criolo.mp3" },
+    { title: "Vento no Litoral", artist: "Legião Urbana", duration: "6:00", src: "./musicas/vento no litoral.mp3" }
+    // Adicione mais músicas aqui, certificando-se de que os arquivos .mp3 existem na pasta 'musicas/'
 ];
 
 let currentTrackIndex = 0; // Índice da faixa principal sendo exibida/controlada
@@ -36,6 +36,18 @@ let tracksInitialized = false; // Flag para garantir que o contexto de áudio se
 // Frequências para as bandas do equalizador (5 bandas)
 const eqFrequencies = [60, 250, 1000, 4000, 16000]; // Em Hz
 
+// Predefinições do Equalizador: [60Hz, 250Hz, 1000Hz, 4000Hz, 16000Hz] - valores em dB
+const eqPresets = {
+    "Padrão (Flat)": [0, 0, 0, 0, 0],
+    "Grave": [8, 4, 0, -2, -4],
+    "Médio": [0, 2, 6, 2, 0],
+    "Acústico": [2, 4, 3, 1, 0],
+    "Rock": [6, 0, -4, 2, 5],
+    "Pop": [4, 2, 0, 3, 1],
+    "Vocal": [-2, 0, 5, 4, 2]
+};
+
+
 // --- Elementos do DOM ---
 const visualizerCanvas = document.getElementById('visualizer');
 const visualizerCtx = visualizerCanvas.getContext('2d');
@@ -53,6 +65,8 @@ const playlistContainer = document.getElementById('playlist');
 const albumArtEl = document.querySelector('.album-art'); // Seleciona a arte do álbum
 
 const equalizerControlsDiv = document.getElementById('equalizer-controls');
+const eqPresetSelect = document.getElementById('eq-preset-select'); // Novo elemento para presets
+
 const track1Select = document.getElementById('track1-select');
 const track2Select = document.getElementById('track2-select');
 const track1VolumeSlider = document.getElementById('track1-volume');
@@ -173,8 +187,8 @@ function loadTrack(audioElement, track, trackId) {
             // Remove todas as classes de cor existentes
             albumArtEl.classList.remove('color-1', 'color-2', 'color-3', 'color-4', 'color-5');
             // Adiciona a nova classe de cor baseada no índice (para randomizar cores)
-            const colorIndex = playlist.indexOf(track);
-            albumArtEl.classList.add(`color-${(colorIndex % 5) + 1}`);
+            const trackIndex = playlist.indexOf(track); // Encontra o índice da track no playlist
+            albumArtEl.classList.add(`color-${(trackIndex % 5) + 1}`);
         }
     }
 
@@ -318,7 +332,7 @@ function drawVisualizer() {
     requestAnimationFrame(drawVisualizer);
 
     // Retorna se o analisador não foi inicializado ou o contexto está suspenso
-    if (!analyser || audioContext.state === 'suspended') return;
+    if (!analyser || (audioContext && audioContext.state === 'suspended')) return;
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -379,9 +393,66 @@ function createEqualizerSliders() {
             }
 
             document.getElementById(`eq-band-${index}-value`).textContent = `${gainValue.toFixed(1)} dB`;
+            // Redefine a seleção de preset para "Personalizado" se o usuário ajustar um slider manualmente
+            eqPresetSelect.value = "Personalizado";
         });
     });
 }
+
+/**
+ * Popula o dropdown de presets do equalizador e adiciona o event listener.
+ */
+function populateEqPresets() {
+    eqPresetSelect.innerHTML = ''; // Limpa opções existentes
+
+    // Adiciona uma opção para "Personalizado" que não altera os sliders automaticamente
+    const customOption = document.createElement('option');
+    customOption.value = "Personalizado";
+    customOption.textContent = "Personalizado";
+    eqPresetSelect.appendChild(customOption);
+
+    for (const presetName in eqPresets) {
+        const option = document.createElement('option');
+        option.value = presetName;
+        option.textContent = presetName;
+        eqPresetSelect.appendChild(option);
+    }
+
+    eqPresetSelect.addEventListener('change', (e) => {
+        const selectedPreset = e.target.value;
+        if (selectedPreset !== "Personalizado") {
+            applyEqPreset(selectedPreset);
+        }
+    });
+}
+
+/**
+ * Aplica um preset de equalizador, atualizando os filtros e os sliders da UI.
+ * @param {string} presetName - O nome do preset a ser aplicado.
+ */
+function applyEqPreset(presetName) {
+    const gains = eqPresets[presetName];
+    if (!gains || !tracksInitialized) {
+        console.warn(`Preset "${presetName}" não encontrado ou AudioContext não inicializado.`);
+        return;
+    }
+
+    document.querySelectorAll('.eq-band-slider').forEach((slider, index) => {
+        const gainValue = gains[index];
+        slider.value = gainValue; // Atualiza a posição do slider
+        document.getElementById(`eq-band-${index}-value`).textContent = `${gainValue.toFixed(1)} dB`; // Atualiza o valor dB
+
+        // Aplica o ganho ao filtro correspondente para ambas as faixas
+        if (eqFilters1[index]) {
+            eqFilters1[index].gain.value = gainValue;
+        }
+        if (eqFilters2[index]) {
+            eqFilters2[index].gain.value = gainValue;
+        }
+    });
+    console.log(`Preset "${presetName}" aplicado.`);
+}
+
 
 // --- Funções da Playlist ---
 
@@ -585,6 +656,8 @@ echoBtn.addEventListener('click', function() {
 document.addEventListener('DOMContentLoaded', () => {
     populatePlaylist();          // Popula a playlist
     createEqualizerSliders();    // Cria os sliders do equalizador
+    populateEqPresets();         // Popula os presets do equalizador
+    applyEqPreset("Padrão (Flat)"); // Aplica o preset padrão na inicialização
     populateTrackSelectors();    // Popula os seletores de faixa e carrega as faixas iniciais
     drawVisualizer();            // Inicia o loop de renderização do visualizador (ele espera o analyser)
 });

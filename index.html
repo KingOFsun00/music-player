@@ -269,6 +269,44 @@
             cursor: pointer;
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.8);
         }
+
+        /* Controles de Presets do Equalizador */
+        .eq-presets-control {
+            margin-top: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .eq-presets-control label {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+        }
+
+        #eq-preset-select {
+            width: 80%;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(40, 40, 60, 0.9);
+            color: #fff;
+            border: 1px solid rgba(78, 205, 196, 0.5);
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C197.8L156.4%2C67.2c-5.8-5.8-15.2-5.8-20.9%2C0L5.4%2C197.8c-5.8%2C5.8-5.8%2C15.2%2C0%2C20.9l19.5%2C19.5c5.8%2C5.8%2C15.2%2C5.8%2C20.9%2C0l96.8-96.8l96.8%2C96.8c5.8%2C5.8%2C15.2%2C5.8%2C20.9%2C0l19.5-19.5C292.9%2C213%2C292.9%2C203.6%2C287%2C197.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px;
+        }
+        
+        #eq-preset-select:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
         
         /* Controles de Efeitos */
         .effects-controls {
@@ -568,6 +606,13 @@
             <!-- Seção de Equalizador e Efeitos -->
             <div class="controls-section">
                 <h2 class="section-title"><i class="fas fa-sliders-h"></i> Equalizador</h2>
+                <!-- Nova seção para presets do equalizador -->
+                <div class="eq-presets-control">
+                    <label for="eq-preset-select">Predefinições:</label>
+                    <select id="eq-preset-select">
+                        <!-- Opções de presets serão populadas via JavaScript -->
+                    </select>
+                </div>
                 <div class="equalizer" id="equalizer-controls">
                     <!-- As bandas do equalizador serão geradas dinamicamente via JavaScript -->
                 </div>
