@@ -1,11 +1,11 @@
-// arquivo.js
+// arquivo.js (Este é o código COMPLETO e ATUALIZADO, incluindo tudo que você já tinha e as novas funções)
 
 // --- Variáveis Globais e Constantes ---
 // Lista de músicas. Os caminhos agora são relativos à raiz do seu repositório GitHub Pages.
 const playlist = [
     { title: "A Via Láctea", artist: "Legião Urbana", duration: "4:00", src: "./musicas/A Via Láctea.mp3" },
     { title: "La Solitudine", artist: "Laura Pausini", duration: "4:00", src: "./musicas/La Solitudine.mp3" },
-    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", src: "./musicas/Trem Bala.mp3" }, 
+    { title: "Trem Bala", artist: "Ana Vilela", duration: "3:00", src: "./musicas/Trem Bala.mp3" },
     { title: "Moonlight", artist: "XXXTENTACION", duration: "2:15", src: "./musicas/MOONLIGHT.mp3" },
     { title: "Não Existe Amor Em SP", artist: "Criolo", duration: "3:45", src: "./musicas/criolo.mp3" },
     { title: "Vento no Litoral", artist: "Legião Urbana", duration: "6:00", src: "./musicas/vento no litoral.mp3" }
@@ -16,11 +16,12 @@ let currentTrackIndex = 0; // Índice da faixa principal sendo exibida/controlad
 let isPlaying = false; // Estado global de reprodução da faixa principal
 
 // Elementos de áudio HTML para as duas faixas
-let audio1 = new Audio(); 
-let audio2 = new Audio(); 
+let audio1 = new Audio();
+let audio2 = new Audio();
 
 // Variáveis para o Web Audio API
-let audioContext; // Contexto de áudio único para ambas as faixas
+let audioContext; // Contexto de áudio único para ambas as faixas principais
+let drumAudioContext; // Contexto de áudio separado para o Drum Pad
 let audioSource1; // Fonte de áudio para a Faixa 1
 let audioSource2; // Fonte de áudio para a Faixa 2
 let gainNode1;    // Nó de ganho (volume) para a Faixa 1
@@ -29,7 +30,11 @@ let analyser;     // Nó de análise para o visualizador
 let eqFilters1 = []; // Array de filtros do equalizador para a Faixa 1
 let eqFilters2 = []; // Array de filtros do equalizador para a Faixa 2
 let lowPassFilter; // Filtro passa-baixa para redução de ruído
-let compressor;    // Compressor para efeitos de masterização
+let compressor;   // Compressor para efeitos de masterização
+
+// Efeitos avançados (placeholders para nós complexos)
+let convolverNode; // Para Reverb
+let delayNode;     // Para Echo
 
 let tracksInitialized = false; // Flag para garantir que o contexto de áudio seja inicializado apenas uma vez
 
@@ -46,6 +51,10 @@ const eqPresets = {
     "Pop": [4, 2, 0, 3, 1],
     "Vocal": [-2, 0, 5, 4, 2]
 };
+
+// Cores padrão para o visualizador (pode ser alterado pela paleta)
+let visualizerColorStart = '#4ECDC4';
+let visualizerColorEnd = '#C7F464';
 
 
 // --- Elementos do DOM ---
@@ -74,6 +83,11 @@ const track2VolumeSlider = document.getElementById('track2-volume');
 const track1PlayPauseBtn = document.getElementById('track1-play-pause');
 const track2PlayPauseBtn = document.getElementById('track2-play-pause');
 
+// Novos elementos do DOM para Drum Pad e Paleta de Cores
+const drumPads = document.querySelectorAll('.drum-pad');
+const colorBoxes = document.querySelectorAll('.color-box');
+
+
 // Botões de efeito (funcionalidade placeholder)
 const noiseReductionBtn = document.getElementById('noise-reduction-btn');
 const reverbBtn = document.getElementById('reverb-btn');
@@ -89,6 +103,7 @@ function initializeAudioContext() {
     if (tracksInitialized) return; // Garante que a inicialização ocorra apenas uma vez
 
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    drumAudioContext = new (window.AudioContext || window.webkitAudioContext)(); // Contexto separado para drums
 
     // Cria nós MediaElementSource a partir dos elementos <audio>
     audioSource1 = audioContext.createMediaElementSource(audio1);
@@ -160,6 +175,23 @@ function initializeAudioContext() {
     lowPassFilter.connect(compressor);
     compressor.connect(analyser);
     analyser.connect(audioContext.destination); // O analisador se conecta à saída final
+
+    // Inicialização para Reverb e Echo (se forem ativados)
+    convolverNode = audioContext.createConvolver();
+    delayNode = audioContext.createDelay(1.0); // Atraso máximo de 1 segundo
+    const feedbackGainNode = audioContext.createGain(); // Nó de ganho para o feedback do eco
+    feedbackGainNode.gain.value = 0.5; // Ajuste o valor para controlar o "decadimento" do eco
+
+    // Conexões básicas para Reverb/Echo (ainda precisam ser ativadas dinamicamente)
+    // Inicialmente, eles não estão conectados na cadeia principal
+    // gainNode1.connect(convolverNode);
+    // convolverNode.connect(analyser);
+
+    // gainNode2.connect(delayNode);
+    // delayNode.connect(feedbackGainNode);
+    // feedbackGainNode.connect(delayNode); // Feedback loop para o eco
+    // feedbackGainNode.connect(analyser);
+
 
     tracksInitialized = true;
     console.log('Contexto de Áudio e cadeia de efeitos inicializados.');
@@ -322,12 +354,7 @@ function setProgressBar(e) {
     }
 }
 
-// --- Funções de Visualização de Áudio ---
 
-/**
- * Renderiza a visualização de áudio no canvas.
- * Usa `requestAnimationFrame` para um loop contínuo de renderização.
- */
 function drawVisualizer() {
     requestAnimationFrame(drawVisualizer);
 
@@ -339,7 +366,15 @@ function drawVisualizer() {
     analyser.getByteFrequencyData(dataArray); // Obtém os dados de frequência do áudio
 
     visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height); // Limpa o canvas
-    // A cor de fundo é definida no CSS para a visualizer-container
+
+    // --- ADICIONE O CÓDIGO ABAIXO AQUI ---
+    // Preenche o fundo do canvas com o gradiente da paleta
+    const backgroundGradient = visualizerCtx.createLinearGradient(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+    backgroundGradient.addColorStop(0, visualizerColorStart);
+    backgroundGradient.addColorStop(1, visualizerColorEnd);
+    visualizerCtx.fillStyle = backgroundGradient;
+    visualizerCtx.fillRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+    // --- FIM DO CÓDIGO A SER ADICIONADO ---
 
     const barWidth = (visualizerCanvas.width / bufferLength) * 2.5; // Ajusta a largura da barra para preencher melhor
     let barHeight;
@@ -348,16 +383,18 @@ function drawVisualizer() {
     for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i] / 2; // Escala a altura para melhor visualização
 
-        // Desenha as barras com cores dinâmicas e gradiente
+        // Desenha as barras com cores dinâmicas e gradiente da paleta
         const gradient = visualizerCtx.createLinearGradient(0, visualizerCanvas.height, 0, visualizerCanvas.height - barHeight);
-        gradient.addColorStop(0, `rgb(78, 205, 196)`); // Cor inicial (azul-verde)
-        gradient.addColorStop(1, `rgb(${barHeight + 100}, 50, ${255 - barHeight})`); // Cor final dinâmica
+        gradient.addColorStop(0, visualizerColorStart); // Cor inicial da paleta
+        gradient.addColorStop(1, visualizerColorEnd); // Cor final da paleta
         visualizerCtx.fillStyle = gradient;
         visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
 
         x += barWidth + 1; // Espaçamento entre as barras
     }
 }
+
+// ... (restante do código) ...
 
 // --- Funções do Equalizador ---
 
@@ -495,7 +532,7 @@ function populatePlaylist() {
         const playlistItem = document.createElement('div');
         playlistItem.classList.add('playlist-item');
         playlistItem.dataset.index = index; // Armazena o índice da faixa
-        
+
         // Determina a classe de cor da arte do álbum
         const colorClass = `color-${(index % 5) + 1}`;
 
@@ -534,6 +571,47 @@ function updatePlaylistUI() {
     if (playingItem) {
         playingItem.classList.add('playing');
     }
+}
+
+// --- Funções do Drum Pad ---
+
+/**
+ * Toca um som do drum pad a partir de um arquivo de áudio.
+ * @param {string} soundSrc - O caminho para o arquivo de áudio do som.
+ */
+async function playDrumSound(soundSrc) {
+    // Inicializa o contexto de áudio do drum pad se não estiver ativo
+    if (!drumAudioContext || drumAudioContext.state === 'closed') {
+        drumAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (drumAudioContext.state === 'suspended') {
+        await drumAudioContext.resume();
+    }
+
+    try {
+        const response = await fetch(soundSrc);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await drumAudioContext.decodeAudioData(arrayBuffer);
+
+        const source = drumAudioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(drumAudioContext.destination);
+        source.start(0); // Toca o som imediatamente
+        console.log(`Tocando som do drum pad: ${soundSrc}`);
+    } catch (e) {
+        console.error("Erro ao carregar ou reproduzir som do drum pad:", e);
+    }
+}
+
+/**
+ * Adiciona um efeito visual de clique ao drum pad.
+ * @param {HTMLElement} pad - O elemento do drum pad clicado.
+ */
+function animateDrumPad(pad) {
+    pad.classList.add('playing');
+    setTimeout(() => {
+        pad.classList.remove('playing');
+    }, 100); // Remove a classe após 100ms
 }
 
 // --- Listeners de Eventos ---
@@ -615,13 +693,49 @@ track2PlayPauseBtn.addEventListener('click', () => {
     }
 });
 
+// Event listeners para o Drum Pad
+drumPads.forEach(pad => {
+    pad.addEventListener('click', () => {
+        const soundSrc = pad.dataset.sound;
+        if (soundSrc) {
+            playDrumSound(soundSrc);
+            animateDrumPad(pad);
+        }
+    });
+});
+
+// Adiciona suporte a teclado para o Drum Pad
+document.addEventListener('keydown', (e) => {
+    const key = e.keyCode;
+    const pad = document.querySelector(`.drum-pad[data-key="${key}"]`);
+    if (pad) {
+        const soundSrc = pad.dataset.sound;
+        if (soundSrc) {
+            playDrumSound(soundSrc);
+            animateDrumPad(pad);
+        }
+    }
+});
+
+// Event listeners para a Paleta de Cores
+colorBoxes.forEach(colorBox => {
+    colorBox.addEventListener('click', () => {
+        const colors = colorBox.dataset.color.split(',');
+        if (colors.length === 2) {
+            visualizerColorStart = colors[0].trim();
+            visualizerColorEnd = colors[1].trim();
+            console.log(`Cores do visualizador alteradas para: ${visualizerColorStart} e ${visualizerColorEnd}`);
+        }
+    });
+});
+
 // Botões de Efeito
 noiseReductionBtn.addEventListener('click', function() {
     if (!lowPassFilter) {
         console.warn("AudioContext ou LowPassFilter não inicializado.");
         return;
     }
-    if (this.textContent === 'Ativar') {
+    if (this.classList.toggle('active')) { // Toggle a classe 'active'
         this.textContent = 'Desativar';
         this.style.background = 'rgba(78, 205, 196, 0.8)'; // Cor de ativado
         lowPassFilter.frequency.value = 3000; // Reduz a frequência de corte para filtrar mais agudos (ruído)
@@ -635,31 +749,57 @@ noiseReductionBtn.addEventListener('click', function() {
 });
 
 reverbBtn.addEventListener('click', function() {
-    // Para uma funcionalidade real de Reverb, você precisaria de um ConvolverNode
-    // e carregar um arquivo de resposta de impulso (impulse response audio file).
-    // Isso é mais complexo e vai além de um simples toggle.
-    this.textContent = this.textContent === 'Ativar' ? 'Desativar' : 'Ativar';
-    this.style.background = this.textContent === 'Desativar' ? 'rgba(78, 205, 196, 0.8)' : 'rgba(40, 40, 60, 0.7)';
-    console.log("Reverb alternado (funcionalidade placeholder).");
+    // Implementação básica de Reverb (ainda um placeholder sem um impulse response real)
+    if (!convolverNode) {
+        console.warn("ConvolverNode não inicializado.");
+        return;
+    }
+    if (this.classList.toggle('active')) {
+        this.textContent = 'Desativar';
+        this.style.background = 'rgba(78, 205, 196, 0.8)';
+        // Para um reverb real, você precisaria carregar um impulse response aqui:
+        // Exemplo: loadImpulseResponse('path/to/impulse.wav').then(buffer => convolverNode.buffer = buffer);
+        // Por enquanto, apenas alternamos a conexão se o nó fosse configurado para isso.
+        console.log("Reverb ativado (funcionalidade placeholder).");
+    } else {
+        this.textContent = 'Ativar';
+        this.style.background = 'rgba(40, 40, 60, 0.7)';
+        console.log("Reverb desativado (funcionalidade placeholder).");
+    }
 });
 
 echoBtn.addEventListener('click', function() {
-    // Para uma funcionalidade real de Eco, você precisaria de um DelayNode
-    // e talvez um nó de ganho para feedback.
-    this.textContent = this.textContent === 'Ativar' ? 'Desativar' : 'Ativar';
-    this.style.background = this.textContent === 'Desativar' ? 'rgba(78, 205, 196, 0.8)' : 'rgba(40, 40, 60, 0.7)';
-    console.log("Eco alternado (funcionalidade placeholder).");
+    // Implementação básica de Echo (ainda um placeholder sem um feedback loop completo)
+    if (!delayNode) {
+        console.warn("DelayNode não inicializado.");
+        return;
+    }
+    if (this.classList.toggle('active')) {
+        this.textContent = 'Desativar';
+        this.style.background = 'rgba(78, 205, 196, 0.8)';
+        // Conecta o nó de delay na cadeia de áudio principal
+        // Note: Se você quiser um echo real com feedback, a cadeia precisa ser mais complexa.
+        // Isso aqui é um delay simples.
+        // Para ligar/desligar um nó no meio da cadeia:
+        // Desconectar o anterior do próximo e reconectar via o novo nó, ou usar um GainNode para 'bypass'
+        console.log("Eco ativado (funcionalidade placeholder).");
+    } else {
+        this.textContent = 'Ativar';
+        this.style.background = 'rgba(40, 40, 60, 0.7)';
+        console.log("Eco desativado (funcionalidade placeholder).");
+    }
 });
+
 
 // --- Chamadas de Configuração Inicial ---
 // Garante que o DOM esteja totalmente carregado antes de manipular elementos
 document.addEventListener('DOMContentLoaded', () => {
-    populatePlaylist();          // Popula a playlist
-    createEqualizerSliders();    // Cria os sliders do equalizador
-    populateEqPresets();         // Popula os presets do equalizador
+    populatePlaylist();       // Popula a playlist
+    createEqualizerSliders(); // Cria os sliders do equalizador
+    populateEqPresets();      // Popula os presets do equalizador
     applyEqPreset("Padrão (Flat)"); // Aplica o preset padrão na inicialização
-    populateTrackSelectors();    // Popula os seletores de faixa e carrega as faixas iniciais
-    drawVisualizer();            // Inicia o loop de renderização do visualizador (ele espera o analyser)
+    populateTrackSelectors(); // Popula os seletores de faixa e carrega as faixas iniciais
+    drawVisualizer();         // Inicia o loop de renderização do visualizador (ele espera o analyser)
 });
 
 // Lida com a suspensão e retomada do AudioContext em mudanças de visibilidade da aba do navegador
@@ -669,6 +809,13 @@ document.addEventListener('visibilitychange', () => {
             audioContext.suspend();
         } else {
             audioContext.resume();
+        }
+    }
+    if (drumAudioContext) { // Também lida com o contexto do drum pad
+        if (document.hidden) {
+            drumAudioContext.suspend();
+        } else {
+            drumAudioContext.resume();
         }
     }
 });
