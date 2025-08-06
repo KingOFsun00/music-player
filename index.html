@@ -3,198 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundWave Studio - Reprodutor Avançado</title>
+    <meta name="description" content="DJ Mixer Pro - Plataforma profissional para mixagem e criação de batidas">
+    <meta name="keywords" content="DJ, mixer, música, audio, equalizer, drum pad">
+    <meta name="author" content="DJ Mixer Pro">
+    <title>DJ Mixer Pro - Studio Profissional</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="styles.css" as="style">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
 </head>
 <body>
-    <header class="header">
-        <h1>DJ Mixer Pro</h1>
-        <p>Sua plataforma profissional para mixagem e criação de batidas!</p>
-    </header>
-
-    <main class="player-container">
-        <section class="visualizer-section">
-            <canvas id="visualizer"></canvas>
-            <div class="visualizer-overlay"></div>
-        </section>
-
-        <section class="main-player-section">
-            <div class="player-info">
-                <div class="album-art color-1">
-                    <i class="fas fa-music"></i>
-                </div>
-                <div class="track-details">
-                    <h2 id="current-track">Nenhuma música carregada</h2>
-                    <p id="current-artist">Artista Desconhecido</p>
-                </div>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-music"></i>
             </div>
-
-            <div class="progress-container" id="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
+            <div class="loading-text">Carregando DJ Mixer Pro...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
             </div>
+        </div>
+    </div>
 
-            <div class="time-display">
-                <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
-            </div>
-
-            <div class="player-controls">
-                <button id="prev-btn" class="control-btn" title="Faixa Anterior">
-                    <i class="fas fa-step-backward"></i>
-                </button>
-                <button id="play-pause-btn" class="control-btn main-play-pause" title="Play/Pause">
-                    <i id="play-icon" class="fas fa-play"></i>
-                </button>
-                <button id="next-btn" class="control-btn" title="Próxima Faixa">
-                    <i class="fas fa-step-forward"></i>
-                </button>
-                <button id="loop-btn" class="control-btn" title="Repetir">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button id="shuffle-btn" class="control-btn" title="Aleatório">
-                    <i class="fas fa-random"></i>
-                </button>
-            </div>
-        </section>
-
-        <section class="track-mixer-section">
-            <div class="track-control">
-                <h3><i class="fas fa-compact-disc"></i> Deck A</h3>
-                <select id="track1-select" class="track-select"></select>
+    <!-- Main Application -->
+    <div id="app" class="app-container" style="display: none;">
+        <header class="header" role="banner">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-headphones"></i>
+                    DJ Mixer Pro
+                </h1>
+                <p class="header-subtitle">Sua plataforma profissional para mixagem e criação de batidas!</p>
                 
-                <div class="volume-container">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="theme-toggle" title="Alternar tema" aria-label="Alternar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="player-container" role="main">
+            <!-- Audio Visualizer -->
+            <section class="visualizer-section" aria-label="Visualizador de áudio">
+                <canvas id="visualizer" class="visualizer-canvas" aria-hidden="true"></canvas>
+                <div class="visualizer-overlay"></div>
+                <div class="visualizer-controls">
+                    <button id="visualizer-toggle" class="visualizer-btn" title="Alternar visualizador">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Main Player -->
+            <section class="main-player-section" aria-label="Player principal">
+                <div class="player-info">
+                    <div class="album-art color-1" role="img" aria-label="Capa do álbum">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="track-details">
+                        <h2 id="current-track" class="track-title">Nenhuma música carregada</h2>
+                        <p id="current-artist" class="track-artist">Artista Desconhecido</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container" id="progress-container" role="progressbar" aria-label="Progresso da música">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <div class="progress-buffer" id="progress-buffer"></div>
+                </div>
+
+                <div class="time-display">
+                    <span id="current-time" class="time-current">0:00</span>
+                    <span class="time-separator">/</span>
+                    <span id="total-time" class="time-total">0:00</span>
+                </div>
+
+                <!-- Player Controls -->
+                <div class="player-controls" role="group" aria-label="Controles do player">
+                    <button id="prev-btn" class="control-btn" title="Faixa anterior" aria-label="Faixa anterior">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button id="play-pause-btn" class="control-btn main-play-pause" title="Play/Pause" aria-label="Play/Pause">
+                        <i id="play-icon" class="fas fa-play"></i>
+                    </button>
+                    <button id="next-btn" class="control-btn" title="Próxima faixa" aria-label="Próxima faixa">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button id="loop-btn" class="control-btn" title="Repetir" aria-label="Repetir">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button id="shuffle-btn" class="control-btn" title="Aleatório" aria-label="Aleatório">
+                        <i class="fas fa-random"></i>
+                    </button>
+                </div>
+
+                <!-- Volume Control -->
+                <div class="volume-control">
                     <i class="fas fa-volume-up volume-icon"></i>
-                    <input type="range" id="track1-volume" min="0" max="1" value="0.7" step="0.01" class="volume-slider">
+                    <input type="range" id="master-volume" min="0" max="1" value="0.8" step="0.01" class="volume-slider" aria-label="Volume principal">
+                    <span id="volume-display" class="volume-display">80%</span>
                 </div>
-                
-                <div class="deck-controls">
-                    <button id="track1-play-pause" class="control-btn deck-play-pause" title="Play/Pause Deck A">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <button id="track1-cue-btn" class="deck-cue-btn" title="Ponto de Cue">
-                        <i class="fas fa-flag"></i> Cue
+            </section>
+
+            <!-- Track Mixer -->
+            <section class="track-mixer-section" aria-label="Mixer de faixas">
+                <div class="track-control deck-a">
+                    <h3><i class="fas fa-compact-disc"></i> Deck A</h3>
+                    <select id="track1-select" class="track-select" aria-label="Selecionar música para Deck A"></select>
+                    
+                    <div class="volume-container">
+                        <i class="fas fa-volume-up volume-icon"></i>
+                        <input type="range" id="track1-volume" min="0" max="1" value="0.7" step="0.01" class="volume-slider" aria-label="Volume Deck A">
+                        <span class="volume-value">70%</span>
+                    </div>
+                    
+                    <div class="deck-controls">
+                        <button id="track1-play-pause" class="control-btn deck-play-pause" title="Play/Pause Deck A" aria-label="Play/Pause Deck A">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="track1-cue-btn" class="deck-cue-btn" title="Ponto de Cue" aria-label="Ponto de Cue">
+                            <i class="fas fa-flag"></i> Cue
+                        </button>
+                    </div>
+                </div>
+
+                <div class="track-control deck-b">
+                    <h3><i class="fas fa-compact-disc"></i> Deck B</h3>
+                    <select id="track2-select" class="track-select" aria-label="Selecionar música para Deck B"></select>
+                    
+                    <div class="volume-container">
+                        <i class="fas fa-volume-up volume-icon"></i>
+                        <input type="range" id="track2-volume" min="0" max="1" value="0.7" step="0.01" class="volume-slider" aria-label="Volume Deck B">
+                        <span class="volume-value">70%</span>
+                    </div>
+                    
+                    <div class="deck-controls">
+                        <button id="track2-play-pause" class="control-btn deck-play-pause" title="Play/Pause Deck B" aria-label="Play/Pause Deck B">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="track2-cue-btn" class="deck-cue-btn" title="Ponto de Cue" aria-label="Ponto de Cue">
+                            <i class="fas fa-flag"></i> Cue
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Equalizer -->
+            <section class="equalizer-section" aria-label="Equalizador">
+                <h3><i class="fas fa-sliders-h"></i> Equalizador Profissional</h3>
+                <div class="eq-preset-container">
+                    <label for="eq-preset-select">Predefinição:</label>
+                    <select id="eq-preset-select" aria-label="Predefinições do equalizador"></select>
+                    <button id="eq-reset" class="eq-reset-btn" title="Resetar equalizador" aria-label="Resetar equalizador">
+                        <i class="fas fa-undo"></i>
                     </button>
                 </div>
-            </div>
+                <div id="equalizer-controls" class="equalizer-grid" role="group" aria-label="Controles do equalizador"></div>
+            </section>
 
-            <div class="track-control">
-                <h3><i class="fas fa-compact-disc"></i> Deck B</h3>
-                <select id="track2-select" class="track-select"></select>
-                
-                <div class="volume-container">
-                    <i class="fas fa-volume-up volume-icon"></i>
-                    <input type="range" id="track2-volume" min="0" max="1" value="0.7" step="0.01" class="volume-slider">
-                </div>
-                
-                <div class="deck-controls">
-                    <button id="track2-play-pause" class="control-btn deck-play-pause" title="Play/Pause Deck B">
-                        <i class="fas fa-play"></i>
+            <!-- Effects -->
+            <section class="effects-section" aria-label="Efeitos de áudio">
+                <h3><i class="fas fa-magic"></i> Efeitos Profissionais</h3>
+                <div class="effects-grid">
+                    <button id="noise-reduction-btn" class="effect-btn" data-effect="noise-reduction" aria-label="Redução de ruído">
+                        <i class="fas fa-volume-mute"></i>
+                        <span>Redução de Ruído</span>
                     </button>
-                    <button id="track2-cue-btn" class="deck-cue-btn" title="Ponto de Cue">
-                        <i class="fas fa-flag"></i> Cue
+                    <button id="reverb-btn" class="effect-btn" data-effect="reverb" aria-label="Reverb">
+                        <i class="fas fa-water"></i>
+                        <span>Reverb</span>
+                    </button>
+                    <button id="echo-btn" class="effect-btn" data-effect="echo" aria-label="Eco">
+                        <i class="fas fa-echo"></i>
+                        <span>Eco</span>
+                    </button>
+                    <button id="flanger-btn" class="effect-btn" data-effect="flanger" aria-label="Flanger">
+                        <i class="fas fa-wave-square"></i>
+                        <span>Flanger</span>
+                    </button>
+                    <button id="phaser-btn" class="effect-btn" data-effect="phaser" aria-label="Phaser">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Phaser</span>
+                    </button>
+                    <button id="compressor-btn" class="effect-btn" data-effect="compressor" aria-label="Compressor">
+                        <i class="fas fa-compress-alt"></i>
+                        <span>Compressor</span>
                     </button>
                 </div>
+            </section>
+
+            <!-- Drum Pad -->
+            <section class="drum-pad-section" aria-label="Drum Pad">
+                <h3><i class="fas fa-drum"></i> Drum Pad Profissional</h3>
+                <div class="drum-pad-grid" role="group" aria-label="Pads de bateria">
+                    <button class="drum-pad" data-key="65" data-sound="clap" tabindex="0" aria-label="Clap - Tecla A">
+                        <div class="drum-pad-key">A</div>
+                        <div class="drum-pad-label">Clap</div>
+                    </button>
+                    <button class="drum-pad" data-key="83" data-sound="hihat" tabindex="0" aria-label="Hi-Hat - Tecla S">
+                        <div class="drum-pad-key">S</div>
+                        <div class="drum-pad-label">Hi-Hat</div>
+                    </button>
+                    <button class="drum-pad" data-key="68" data-sound="kick" tabindex="0" aria-label="Kick - Tecla D">
+                        <div class="drum-pad-key">D</div>
+                        <div class="drum-pad-label">Kick</div>
+                    </button>
+                    <button class="drum-pad" data-key="70" data-sound="openhat" tabindex="0" aria-label="Open Hat - Tecla F">
+                        <div class="drum-pad-key">F</div>
+                        <div class="drum-pad-label">Open Hat</div>
+                    </button>
+                    <button class="drum-pad" data-key="71" data-sound="boom" tabindex="0" aria-label="Boom - Tecla G">
+                        <div class="drum-pad-key">G</div>
+                        <div class="drum-pad-label">Boom</div>
+                    </button>
+                    <button class="drum-pad" data-key="72" data-sound="ride" tabindex="0" aria-label="Ride - Tecla H">
+                        <div class="drum-pad-key">H</div>
+                        <div class="drum-pad-label">Ride</div>
+                    </button>
+                    <button class="drum-pad" data-key="74" data-sound="snare" tabindex="0" aria-label="Snare - Tecla J">
+                        <div class="drum-pad-key">J</div>
+                        <div class="drum-pad-label">Snare</div>
+                    </button>
+                    <button class="drum-pad" data-key="75" data-sound="tom" tabindex="0" aria-label="Tom - Tecla K">
+                        <div class="drum-pad-key">K</div>
+                        <div class="drum-pad-label">Tom</div>
+                    </button>
+                    <button class="drum-pad" data-key="76" data-sound="tink" tabindex="0" aria-label="Tink - Tecla L">
+                        <div class="drum-pad-key">L</div>
+                        <div class="drum-pad-label">Tink</div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Color Palette -->
+            <section class="color-palette-section" aria-label="Paleta de cores">
+                <h3><i class="fas fa-palette"></i> Temas do Visualizador</h3>
+                <div class="color-palette-grid" role="group" aria-label="Paleta de cores do visualizador">
+                    <button class="color-box active" data-colors="#4ECDC4,#C7F464" title="Tema Aqua" aria-label="Tema Aqua"></button>
+                    <button class="color-box" data-colors="#FF6B6B,#FFE66D" title="Tema Sunset" aria-label="Tema Sunset"></button>
+                    <button class="color-box" data-colors="#EE8572,#F0B67F" title="Tema Peach" aria-label="Tema Peach"></button>
+                    <button class="color-box" data-colors="#2EC4B6,#E0BBE4" title="Tema Ocean" aria-label="Tema Ocean"></button>
+                    <button class="color-box" data-colors="#8338EC,#FB5607" title="Tema Purple" aria-label="Tema Purple"></button>
+                    <button class="color-box" data-colors="#FF0080,#7928CA" title="Tema Neon" aria-label="Tema Neon"></button>
+                </div>
+                <p class="color-tip">Clique em um tema para aplicar ao visualizador de áudio</p>
+            </section>
+
+            <!-- Playlist -->
+            <section class="playlist-section" aria-label="Playlist">
+                <h3><i class="fas fa-list"></i> Sua Playlist</h3>
+                <div class="playlist-controls">
+                    <button id="playlist-shuffle" class="playlist-control-btn" title="Embaralhar playlist" aria-label="Embaralhar playlist">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button id="playlist-repeat" class="playlist-control-btn" title="Repetir playlist" aria-label="Repetir playlist">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button id="playlist-clear" class="playlist-control-btn" title="Limpar playlist" aria-label="Limpar playlist">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div id="playlist" class="playlist-grid" role="list" aria-label="Lista de músicas"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <div class="footer-content">
+                <p class="footer-title">DJ Mixer Pro &copy; 2024</p>
+                <p class="footer-subtitle">Desenvolvido com <i class="fas fa-heart" style="color: #FF6B6B;"></i> para amantes da música</p>
+                <p class="footer-help">Pressione as teclas A-L para usar o Drum Pad | Espaço para Play/Pause | Setas para navegar</p>
             </div>
-        </section>
+        </footer>
+    </div>
 
-        <section class="equalizer-section">
-            <h3><i class="fas fa-sliders-h"></i> Equalizador</h3>
-            <div class="eq-preset-container">
-                <label for="eq-preset-select">Predefinição:</label>
-                <select id="eq-preset-select"></select>
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Erro</h3>
+                <button class="modal-close" aria-label="Fechar">&times;</button>
             </div>
-            <div id="equalizer-controls" class="equalizer-grid"></div>
-        </section>
-
-        <section class="effects-section">
-            <h3><i class="fas fa-magic"></i> Efeitos</h3>
-            <div class="effects-grid">
-                <button id="noise-reduction-btn" class="effect-btn">
-                    <i class="fas fa-volume-mute"></i> Redução de Ruído
-                </button>
-                <button id="reverb-btn" class="effect-btn">
-                    <i class="fas fa-water"></i> Reverb
-                </button>
-                <button id="echo-btn" class="effect-btn">
-                    <i class="fas fa-echo"></i> Eco
-                </button>
-                <button id="flanger-btn" class="effect-btn">
-                    <i class="fas fa-wave-square"></i> Flanger
-                </button>
-                <button id="phaser-btn" class="effect-btn">
-                    <i class="fas fa-project-diagram"></i> Phaser
-                </button>
-                <button id="compressor-btn" class="effect-btn">
-                    <i class="fas fa-compress-alt"></i> Compressor
-                </button>
+            <div class="modal-body">
+                <p id="error-message">Ocorreu um erro inesperado.</p>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <section class="drum-pad-section">
-            <h3><i class="fas fa-drum"></i> Drum Pad Profissional</h3>
-            <div class="drum-pad-grid">
-                <button class="drum-pad" data-key="65" data-sound="./sounds/clap.wav">
-                    <div class="drum-pad-key">A</div>
-                    <div class="drum-pad-label">Clap</div>
-                </button>
-                <button class="drum-pad" data-key="83" data-sound="./sounds/hihat.wav">
-                    <div class="drum-pad-key">S</div>
-                    <div class="drum-pad-label">Hi-Hat</div>
-                </button>
-                <button class="drum-pad" data-key="68" data-sound="./sounds/kick.wav">
-                    <div class="drum-pad-key">D</div>
-                    <div class="drum-pad-label">Kick</div>
-                </button>
-                <button class="drum-pad" data-key="70" data-sound="./sounds/openhat.wav">
-                    <div class="drum-pad-key">F</div>
-                    <div class="drum-pad-label">Open Hat</div>
-                </button>
-                <button class="drum-pad" data-key="71" data-sound="./sounds/boom.wav">
-                    <div class="drum-pad-key">G</div>
-                    <div class="drum-pad-label">Boom</div>
-                </button>
-                <button class="drum-pad" data-key="72" data-sound="./sounds/ride.wav">
-                    <div class="drum-pad-key">H</div>
-                    <div class="drum-pad-label">Ride</div>
-                </button>
-                <button class="drum-pad" data-key="74" data-sound="./sounds/snare.wav">
-                    <div class="drum-pad-key">J</div>
-                    <div class="drum-pad-label">Snare</div>
-                </button>
-                <button class="drum-pad" data-key="75" data-sound="./sounds/tom.wav">
-                    <div class="drum-pad-key">K</div>
-                    <div class="drum-pad-label">Tom</div>
-                </button>
-                <button class="drum-pad" data-key="76" data-sound="./sounds/tink.wav">
-                    <div class="drum-pad-key">L</div>
-                    <div class="drum-pad-label">Tink</div>
-                </button>
-            </div>
-        </section>
-
-        <section class="color-palette-section">
-            <h3><i class="fas fa-palette"></i> Paleta de Cores do Visualizador</h3>
-            <div class="color-palette-grid">
-                <div class="color-box" data-color="#4ECDC4,#C7F464"></div>
-                <div class="color-box" data-color="#FF6B6B,#FFE66D"></div>
-                <div class="color-box" data-color="#EE8572,#F0B67F"></div>
-                <div class="color-box" data-color="#2EC4B6,#E0BBE4"></div>
-                <div class="color-box" data-color="#8338EC,#FB5607"></div>
-            </div>
-            <p class="color-tip">Clique em uma cor para aplicar ao visualizador de áudio</p>
-        </section>
-
-        <section class="playlist-section">
-            <h3><i class="fas fa-list"></i> Sua Playlist</h3>
-            <div id="playlist" class="playlist-grid"></div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>DJ Mixer Pro &copy; 2023 | Desenvolvido com <i class="fas fa-heart" style="color: #FF6B6B;"></i> para amantes da música</p>
-        <p>Pressione as teclas A-L para usar o Drum Pad ou clique nos botões</p>
-    </footer>
-
+    <!-- Scripts -->
     <script src="script.js"></script>
 </body>
 </html>

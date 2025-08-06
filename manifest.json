@@ -1,0 +1,24 @@
+{
+    "name": "DJ Mixer Pro",
+    "short_name": "DJ Mixer",
+    "description": "Plataforma profissional para mixagem e criação de batidas",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#0f0f1a",
+    "theme_color": "#4ECDC4",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%234ECDC4'/><text x='96' y='120' font-size='80' text-anchor='middle' fill='white'>🎵</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%234ECDC4'/><text x='256' y='320' font-size='200' text-anchor='middle' fill='white'>🎵</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["music", "entertainment"],
+    "lang": "pt-BR"
+}
